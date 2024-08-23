@@ -7,14 +7,17 @@ const NOMINATIM_API_KEY = '5d7c47358580d0c767a2650745ac920f272ec422258c1c4527007
 
 
 // Controller function to fetch weather data
-export async function getWeather(req, res) {
+export async function getLocationLogLat(req, res) {
   const { location } = req.params;
 
   try {
     // Fetch latitude and longitude using Nominatim
     const nominatimResponse = await axios.get(NOMINATIM_API_URL, {
-      params: { q: location, format: 'json' },
-      headers: { 'x-api-key': NOMINATIM_API_KEY }
+      params: {
+        q: location,
+        format: 'json',
+      },
+      headers: { 'x-api-key': NOMINATIM_API_KEY },
     });
 
     if (nominatimResponse.data.length === 0) {
@@ -29,18 +32,21 @@ export async function getWeather(req, res) {
       params: {
         key: WEATHER_API_KEY,
         q: `${lat},${lon}`,
-        aqi: 'yes'
-      }
+        aqi: 'yes',
+      },
     });
 
-    // Return the weather data
-    res.json(weatherResponse.data);
+    // Return latitude, longitude, and weather data
+    res.json({
+      lat,
+      lon,
+      weather: weatherResponse.data
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'An error occurred while fetching weather data' });
+    res.status(500).json({ error: 'An error occurred while fetching data' });
   }
 }
-
 
 export const getWeatherForecast = async (req, res) => {
     try {

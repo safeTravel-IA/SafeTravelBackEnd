@@ -27,6 +27,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  profilePicture: {
+    type: String, // Stores the file path to the profile picture
+    default: null // Optional field, default to null if not provided
+  },
   emergencyContacts: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'EmergencyContact'
