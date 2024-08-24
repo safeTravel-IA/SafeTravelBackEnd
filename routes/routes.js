@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { getLocationLogLat } from '../controllers/weatherController.js';
+import { getLocationLogLat,getWeatherAlertByLocation } from '../controllers/weatherController.js';
 import { getImages,getUserImages} from '../controllers/destinationController.js'; // Adjust the path as necessary
 import { getWeatherByIp,signup,signin,updateUserLocation,getProfile,getUserImage } from '../controllers/userController.js';
 import { convertCurrency } from '../controllers/convertionController.js';
@@ -18,6 +18,6 @@ router.post('/updateUserLocation', updateUserLocation);
 router.get('/profile/:userId', getProfile);
 router.get('/image/:imageName', getUserImage);
 router.get('/user/images', getUserImages);
-
+router.get('/weather/alerts', getWeatherAlertByLocation);
 
 export default router;
