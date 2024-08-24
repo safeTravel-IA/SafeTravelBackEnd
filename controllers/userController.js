@@ -7,35 +7,44 @@ import path from 'path';
 
 import { fileURLToPath } from 'url';
 
+const API_KEY="5d7c47358580d0c767a2650745ac920f272ec422258c1c45270070c41b7f3ee7"
+const GEOLOCATION_API_URL = 'https://ipinfo.io/json?token=6622745470134a'; // Example URL
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename)
-const AMBEEDATA_API_KEY = process.env.AMBEEDATA_API_KEY;
+const AMBEEDATA_API_KEY = API_KEY;
 
-export const getWeatherByUserLocation = async (req, res) => {
-    try {
-      const { userId } = req.params;
-  
-      // Fetch the user to get the location coordinates
-      const user = await User.findById(userId);
-      if (!user || !user.location || !user.location.coordinates) {
-        return res.status(404).json({ error: 'User or location not found' });
+export const getWeatherByIp = async (req, res) => {
+  try {
+      // Get the client's IP address from the request header
+      const ipAddress = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+      if (!ipAddress) {
+          return res.status(400).json({ error: 'IP address not found' });
       }
-  
-      const [lat, lng] = user.location.coordinates;
-  
-      // Call AmbeeData API
-      const response = await axios.get(`https://api.ambeedata.com/latest/by-lat-lng?lat=${lat}&lng=${lng}`, {
-        headers: {
-          'x-api-key': AMBEEDATA_API_KEY
-        }
+      
+      // Fetch geolocation data from the IP address
+      const geoResponse = await axios.get(GEOLOCATION_API_URL);
+      const loc = geoResponse.data.loc.split(',');
+      const latitude = loc[0];
+      const longitude = loc[1];
+      
+      if (!latitude || !longitude) {
+          return res.status(404).json({ error: 'Could not determine coordinates from IP address' });
+      }
+      
+      // Call AmbeeData API to fetch weather data
+      const weatherResponse = await axios.get(`https://api.ambeedata.com/latest/by-lat-lng?lat=${latitude}&lng=${longitude}`, {
+          headers: {
+              'x-api-key': AMBEEDATA_API_KEY
+          }
       });
-  
-      res.status(200).json(response.data);
-    } catch (error) {
+      
+      res.status(200).json(weatherResponse.data);
+  } catch (error) {
+      console.error('Error fetching weather data:', error.message); // Detailed logging
       res.status(500).json({ error: 'Failed to fetch weather data' });
-    }
-  };
-
+  }
+};
 
 
 // Update user location
