@@ -81,128 +81,115 @@ export const getWeatherForecast = async (req, res) => {
   }
 };
 
-// Define thresholds for different pollutants
 const alertThresholds = {
-  CO: 10,        // Example threshold for Carbon Monoxide
-  NO2: 50,       // Example threshold for Nitrogen Dioxide
-  OZONE: 100,    // Example threshold for Ozone
-  PM10: 50,      // Example threshold for PM10
-  PM25: 35,      // Example threshold for PM2.5
-  SO2: 20,       // Example threshold for Sulfur Dioxide
-  AQI: 100       // Example threshold for Air Quality Index (AQI)
+  CO: 10,
+  NO2: 50,
+  OZONE: 100,
+  PM10: 50,
+  PM25: 35,
+  SO2: 20,
+  AQI: 100,
+  temperature: { min: 0, max: 35 },  // Example thresholds for extreme temperatures in °C
+  windSpeed: 20,  // Threshold for high wind speed in m/s
+  precipitation: 5  // Threshold for rain in mm
 };
 
-// Gemini model to analyze weather data and determine if alerts should be triggered
 export const analyzeWeatherData = (weatherData) => {
-  const { CO, NO2, OZONE, PM10, PM25, SO2, AQI } = weatherData;
-  let alerts = [];
-  let isWeatherGood = true; // Flag to track overall weather condition
+  const { CO, NO2, OZONE, PM10, PM25, SO2, AQI, windSpeed, precipitation } = weatherData;
+  
+  let pollutionAlerts = [];
+  let weatherAlerts = [];
+  let isWeatherGood = true;
 
-  // Check each parameter against the threshold
-  if (CO) {
-    if (CO > alertThresholds.CO) {
-      alerts.push("High Carbon Monoxide levels detected.");
-      isWeatherGood = false;
-    } else if (CO < alertThresholds.CO) {
-      alerts.push("Carbon Monoxide levels are within safe limits.");
-    }
+  // Analyze pollution data
+  if (CO && CO > alertThresholds.CO) pollutionAlerts.push("High Carbon Monoxide levels detected.");
+  if (NO2 && NO2 > alertThresholds.NO2) pollutionAlerts.push("High Nitrogen Dioxide levels detected.");
+  if (OZONE && OZONE > alertThresholds.OZONE) pollutionAlerts.push("High Ozone levels detected.");
+  if (PM10 && PM10 > alertThresholds.PM10) pollutionAlerts.push("High PM10 levels detected.");
+  if (PM25 && PM25 > alertThresholds.PM25) pollutionAlerts.push("High PM2.5 levels detected.");
+  if (SO2 && SO2 > alertThresholds.SO2) pollutionAlerts.push("High Sulfur Dioxide levels detected.");
+  if (AQI && AQI > alertThresholds.AQI) pollutionAlerts.push("Unhealthy Air Quality Index detected.");
+
+  // Analyze weather conditions (excluding temperature as it's not available)
+  if (windSpeed && windSpeed > alertThresholds.windSpeed) {
+    weatherAlerts.push("High wind speed detected.");
+    isWeatherGood = false;
   }
 
-  if (NO2) {
-    if (NO2 > alertThresholds.NO2) {
-      alerts.push("High Nitrogen Dioxide levels detected.");
-      isWeatherGood = false;
-    } else if (NO2 < alertThresholds.NO2) {
-      alerts.push("Nitrogen Dioxide levels are within safe limits.");
-    }
+  if (precipitation && precipitation > alertThresholds.precipitation) {
+    weatherAlerts.push("Heavy rain detected.");
+    isWeatherGood = false;
   }
 
-  if (OZONE) {
-    if (OZONE > alertThresholds.OZONE) {
-      alerts.push("High Ozone levels detected.");
-      isWeatherGood = false;
-    } else if (OZONE < alertThresholds.OZONE) {
-      alerts.push("Ozone levels are within safe limits.");
-    }
-  }
-
-  if (PM10) {
-    if (PM10 > alertThresholds.PM10) {
-      alerts.push("High PM10 levels detected.");
-      isWeatherGood = false;
-    } else if (PM10 < alertThresholds.PM10) {
-      alerts.push("PM10 levels are within safe limits.");
-    }
-  }
-
-  if (PM25) {
-    if (PM25 > alertThresholds.PM25) {
-      alerts.push("High PM2.5 levels detected.");
-      isWeatherGood = false;
-    } else if (PM25 < alertThresholds.PM25) {
-      alerts.push("PM2.5 levels are within safe limits.");
-    }
-  }
-
-  if (SO2) {
-    if (SO2 > alertThresholds.SO2) {
-      alerts.push("High Sulfur Dioxide levels detected.");
-      isWeatherGood = false;
-    } else if (SO2 < alertThresholds.SO2) {
-      alerts.push("Sulfur Dioxide levels are within safe limits.");
-    }
-  }
-
-  if (AQI) {
-    if (AQI > alertThresholds.AQI) {
-      alerts.push("Unhealthy Air Quality Index detected.");
-      isWeatherGood = false;
-    } else if (AQI < alertThresholds.AQI) {
-      alerts.push("Air Quality Index is in a healthy range.");
-    }
-  }
-
-  // Add a final summary alert for overall weather conditions
-  if (isWeatherGood) {
-    alerts.push("Overall weather conditions are good.");
+  // Determine final message for weather conditions
+  if (isWeatherGood && weatherAlerts.length === 0) {
+    weatherAlerts.push("Overall weather conditions are good.");
   } else {
-    alerts.push("Overall weather conditions are not good.");
+    weatherAlerts.push("Overall weather conditions are not good.");
   }
 
-  return alerts;
+  return { pollutionAlerts, weatherAlerts };
 };
-
 
 export const getWeatherAlertByLocation = async (req, res) => {
   try {
-    // Get the client's IP address
-    const ipAddress = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-    if (!ipAddress) {
-      return res.status(400).json({ error: 'IP address not found' });
+    let latitude;
+    let longitude;
+
+    // Extract destination from POST request body
+    const { destination, lat, lon } = req.body;
+
+    if (destination) {
+      // Get coordinates for the destination using OpenCage Geocoding API
+      const geoResponse = await axios.get(`https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(destination)}&key=8b003d59e6c34328bc22f727b65c7ab4`);
+      const location = geoResponse.data.results[0]?.geometry;
+      if (!location) {
+        return res.status(404).json({ error: 'Location not found' });
+      }
+      latitude = location.lat;
+      longitude = location.lng;
+    } else if (lat && lon) {
+      // Use coordinates from request body
+      latitude = lat;
+      longitude = lon;
+    } else {
+      // Get the client's IP address
+      const ipAddress = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+      if (!ipAddress) {
+        return res.status(400).json({ error: 'IP address not found' });
+      }
+
+      // Fetch geolocation data based on IP address using ipinfo.io
+      const geoResponse = await axios.get(`https://ipinfo.io/${ipAddress}/json?token=6622745470134a`);
+      const loc = geoResponse.data.loc.split(',');
+      latitude = loc[0];
+      longitude = loc[1];
     }
 
-    // Fetch geolocation data
-    const geoResponse = await axios.get(GEOLOCATION_API_URL);
-    const loc = geoResponse.data.loc.split(',');
-    const latitude = loc[0];
-    const longitude = loc[1];
-
-    // Fetch weather data based on location
+    // Fetch weather data based on latitude and longitude
     const weatherResponse = await axios.get(`https://api.ambeedata.com/latest/by-lat-lng?lat=${latitude}&lng=${longitude}`, {
       headers: {
         'x-api-key': AMBEEDATA_API_KEY
       }
     });
 
-    const weatherData = weatherResponse.data.stations[0]; // Assume this is the correct structure
+    const weatherData = weatherResponse.data.stations[0]; // Assuming this is the correct structure
 
-    // Use the Gemini model to analyze the weather data
-    const alerts = analyzeWeatherData(weatherData);
+    // Use the analyzeWeatherData function to analyze the weather data
+    const { pollutionAlerts, weatherAlerts } = analyzeWeatherData(weatherData);
 
-    if (alerts.length > 0) {
-      return res.status(200).json({ message: 'Weather alerts detected', alerts });
+    if (pollutionAlerts.length > 0 || weatherAlerts.length > 0) {
+      return res.status(200).json({
+        message: 'Weather alerts detected',
+        pollutionAlerts,
+        weatherAlerts
+      });
     } else {
-      return res.status(200).json({ message: 'No weather alerts detected', alerts: [] });
+      return res.status(200).json({
+        message: 'No significant weather alerts detected',
+        pollutionAlerts: [],
+        weatherAlerts: []
+      });
     }
   } catch (error) {
     console.error('Error fetching weather data:', error.message);

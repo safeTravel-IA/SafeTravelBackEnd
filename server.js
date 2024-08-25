@@ -2,6 +2,8 @@ import express from 'express';
 import mongoose from 'mongoose';
 import routes from './routes/routes.js';  // Routes file import
 import { notFoundError, errorHandler } from './middlewares/error-handler.js';
+import destinations from './data/destinations.json' assert { type: 'json' }; // Add the assertion
+import Destination from './models/destination.js'; // Adjust path as needed
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -59,3 +61,18 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`Open your browser and visit http://localhost:${PORT}`);
 });
+// Seed Destinations
+const seedDestinations = async () => {
+  try {
+    // Clear existing data
+    await Destination.deleteMany({});
+    // Insert new data
+    await Destination.insertMany(destinations);
+    console.log('Destinations seeded successfully');
+  } catch (error) {
+    console.error('Error seeding destinations:', error.message);
+  }
+};
+
+// Call the seed function
+seedDestinations();

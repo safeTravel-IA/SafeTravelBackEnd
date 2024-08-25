@@ -75,6 +75,9 @@ export const getUserImage = (req, res) => {
   const imageName = req.params.imageName;
   const imagePath = path.join(__dirname, '..', 'uploads', imageName);
 
+  console.log(`Requested image: ${imageName}`);
+  console.log(`Image path resolved to: ${imagePath}`);
+
   fs.access(imagePath, fs.constants.F_OK, (err) => {
     if (err) {
       console.error(`Image not found: ${imagePath}`);

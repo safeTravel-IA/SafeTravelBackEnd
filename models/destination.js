@@ -22,16 +22,15 @@ const destinationSchema = new mongoose.Schema({
       required: true
     }
   },
-  images: [String], // Array of image URLs or file paths
   category: {
     type: String,
     enum: ['City', 'Nature', 'Historical', 'Cultural', 'Other'], // Categories for destinations
     default: 'Other'
   },
-  comments: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Comment' // Reference to the Comment model
-  }],
+  image: {
+    type: String, // URL or path to the image file
+    required: false // Optional field
+  },
   createdAt: {
     type: Date,
     default: Date.now

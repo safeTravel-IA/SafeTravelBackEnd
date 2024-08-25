@@ -1,6 +1,8 @@
 const UNSPLASH_API_URL = 'https://api.unsplash.com/search/photos';
 const UNSPLASH_ACCESS_KEY = 'Z7OgKkExWQBJeajakKWQaBReFbZw84EaXzVpzgoNaDI';
+import Destination from '../models/destination.js';
 import { promisify } from 'util';
+import mongoose from 'mongoose';
 const accessAsync = promisify(fs.access);
 import fs from 'fs';
 import axios  from "axios";
@@ -77,3 +79,40 @@ export async function getUserImages(req, res) {
     return res.status(500).json({ error: 'An error occurred while fetching images' });
   }
 }
+
+export const getDestinationNameById = async (destinationId) => {
+  try {
+    const destination = await Destination.findById(destinationId);
+    if (!destination) {
+      throw new Error('Destination not found');
+    }
+    return destination.name;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+
+export const listAllDestinations = async (req, res) => {
+  try {
+    console.log('Fetching destinations...');
+
+    // Verify if connection is still alive
+    console.log('Connection status:', mongoose.connection.readyState);
+
+    const destinations = await Destination.find();
+    
+    res.status(200).json({
+      success: true,
+      count: destinations.length,
+      data: destinations
+    });
+  } catch (error) {
+    console.error('Error fetching destinations:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch destinations',
+      error: error.message
+    });
+  }
+};

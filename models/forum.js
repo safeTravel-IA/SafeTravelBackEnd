@@ -7,6 +7,11 @@ const forumPostSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
+  destinationId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Destination',
+    required: true
+  },
   title: {
     type: String,
     required: true
@@ -15,6 +20,10 @@ const forumPostSchema = new mongoose.Schema({
     type: String,
     required: true
   },    
+  image: {
+    type: String, // Stores the file path or URL of the image
+    required: true
+  },
   comments: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Comment' // Reference to the Comment model
