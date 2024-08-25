@@ -8,7 +8,7 @@ import { getGeolocation } from '../controllers/locationController.js';
 import { createForumPost,getAllForumPosts,getForumPostById,updateForumPost,deleteForumPost } from '../controllers/forumController.js';
 import { createPlanning } from '../controllers/planningController.js';
 import upload from '../middlewares/multer.js';
-
+import { translateController} from '../controllers/translationController.js';
 const router = express.Router();
 router.get('/geolocation', getGeolocation);
 router.post('/signup', signup);
@@ -16,7 +16,7 @@ router.post('/signin', signin);
 router.get('/weather/getByIp', getWeatherByIp);
 router.get('/:location', getLocationLogLat);
 router.get('/about/images/:query', getImages);
-router.get('/convert', convertCurrency);
+router.get('/convertion/convert', convertCurrency);
 router.post('/updateUserLocation', updateUserLocation);
 router.get('/profile/:userId', getProfile);
 router.get('/image/:imageName', getUserImage);
@@ -39,5 +39,8 @@ router.post('/plannings', createPlanning);
 
 // Route for deleting a forum post
 router.delete('/forum/:id', deleteForumPost);
+
+router.post('/translate', translateController);
+
 
 export default router;
