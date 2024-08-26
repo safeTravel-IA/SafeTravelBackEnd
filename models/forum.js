@@ -1,4 +1,6 @@
 import mongoose from 'mongoose';
+import { commentSchema } from '../models/comment.js'; // Adjust the path as necessary
+import { reviewSchema } from '../models/review.js';   // Adjust the path as necessary
 
 // Define the schema for the ForumPost model
 const forumPostSchema = new mongoose.Schema({
@@ -19,15 +21,19 @@ const forumPostSchema = new mongoose.Schema({
   content: {
     type: String,
     required: true
-  },    
+  },
   image: {
     type: String, // Stores the file path or URL of the image
-    required: true
   },
-  comments: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Comment' // Reference to the Comment model
+  hashtags: [{
+    type: String // Array of hashtags
   }],
+  likes: {
+    type: Number,
+    default: 0
+  },
+  comments: [commentSchema], // Reference the schema for comments
+  reviews: [reviewSchema], // Reference the schema for reviews
   createdAt: {
     type: Date,
     default: Date.now

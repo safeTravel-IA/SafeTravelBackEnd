@@ -25,20 +25,20 @@ router.post('/weather/alerts', getWeatherAlertByLocation);
 router.get('/destination/list', listAllDestinations);
 router.post('/forum/create', createForumPost);
 
-router.post('/forum/create', upload.single('image'), createForumPost);
+router.post('/forum/create', createForumPost);
 
 // Route for getting all forum posts
 router.get('/forum/getA', getAllForumPosts);
+router.delete('/forum/:id', deleteForumPost);
 
 // Route for getting a single forum post by ID
 router.get('/forum/:id', getForumPostById);
 
 // Route for updating a forum post with image upload
-router.put('/forum/:id', upload.single('image'), updateForumPost);
+router.put('/forum/:id', updateForumPost);
 router.post('/plannings', createPlanning);
 
 // Route for deleting a forum post
-router.delete('/forum/:id', deleteForumPost);
 
 router.post('/translate', translateController);
 
