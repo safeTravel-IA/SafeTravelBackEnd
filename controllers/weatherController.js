@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const WEATHER_API_KEY = '243fc3d6a1c5445498c170704242108';
-const WEATHER_API_URL = 'http://api.weatherapi.com/v1/current.json';
+const WEATHER_API_URL = 'http://api.weatherapi.com/v1/forecast.json';
 const NOMINATIM_API_URL = 'https://nominatim.openstreetmap.org/search';
 const NOMINATIM_API_KEY = '5d7c47358580d0c767a2650745ac920f272ec422258c1c45270070c41b7f3ee7';
 import fetch from 'node-fetch'; // Ensure you import fetch if using Node.js
@@ -9,7 +9,6 @@ const API_KEY="5d7c47358580d0c767a2650745ac920f272ec422258c1c45270070c41b7f3ee7"
 const AMBEEDATA_API_KEY = API_KEY;
 const GEOLOCATION_API_URL = 'https://ipinfo.io/json?token=6622745470134a'; // Example URL
 
-// Controller function to fetch weather data
 export async function getLocationLogLat(req, res) {
   const { location } = req.params;
 
@@ -18,7 +17,7 @@ export async function getLocationLogLat(req, res) {
     const nominatimResponse = await axios.get(NOMINATIM_API_URL, {
       params: {
         q: location,
-        format: 'json',
+        
       },
       headers: { 'x-api-key': NOMINATIM_API_KEY },
     });
@@ -30,16 +29,18 @@ export async function getLocationLogLat(req, res) {
     const lat = nominatimResponse.data[0].lat;
     const lon = nominatimResponse.data[0].lon;
 
-    // Fetch weather data using WeatherAPI
+    // Fetch weather forecast data using WeatherAPI for 5 days
     const weatherResponse = await axios.get(WEATHER_API_URL, {
       params: {
         key: WEATHER_API_KEY,
-        q: `${lat},${lon}`,
-        aqi: 'yes',
+        q: location,
+        days: 5, // Number of days for the forecast
+        aqi: 'no', // Air Quality Index (AQI) option
+        alerts: 'no', // Alerts option
       },
     });
 
-    // Return latitude, longitude, and weather data
+    // Return latitude, longitude, and weather forecast data
     res.json({
       lat,
       lon,

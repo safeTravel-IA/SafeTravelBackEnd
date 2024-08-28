@@ -14,7 +14,7 @@ router.get('/geolocation', getGeolocation);
 router.post('/signup', signup);
 router.post('/signin', signin);
 router.get('/weather/getByIp', getWeatherByIp);
-router.get('/:location', getLocationLogLat);
+router.get('/forecast/:location', getLocationLogLat);
 router.get('/about/images/:query', getImages);
 router.get('/convertion/convert', convertCurrency);
 router.post('/updateUserLocation', updateUserLocation);
@@ -26,15 +26,15 @@ router.get('/destination/list', listAllDestinations);
 router.post('/forum/create', createForumPost);
 
 router.post('/forum/create', createForumPost);
-
 // Route for getting all forum posts
 router.get('/forum/getA', getAllForumPosts);
 router.delete('/forum/:id', deleteForumPost);
-
 // Route for getting a single forum post by ID
 router.get('/forum/:id', getForumPostById);
 
 // Route for updating a forum post with image upload
+
+
 router.put('/forum/:id', updateForumPost);
 router.post('/plannings', createPlanning);
 
