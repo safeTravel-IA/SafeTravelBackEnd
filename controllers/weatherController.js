@@ -9,6 +9,7 @@ const API_KEY="5d7c47358580d0c767a2650745ac920f272ec422258c1c45270070c41b7f3ee7"
 const AMBEEDATA_API_KEY = API_KEY;
 const GEOLOCATION_API_URL = 'https://ipinfo.io/json?token=6622745470134a'; // Example URL
 
+// Updated function to return only time and average temperature for the next 5 days
 export async function getLocationLogLat(req, res) {
   const { location } = req.params;
 
@@ -17,7 +18,6 @@ export async function getLocationLogLat(req, res) {
     const nominatimResponse = await axios.get(NOMINATIM_API_URL, {
       params: {
         q: location,
-        
       },
       headers: { 'x-api-key': NOMINATIM_API_KEY },
     });
@@ -34,17 +34,24 @@ export async function getLocationLogLat(req, res) {
       params: {
         key: WEATHER_API_KEY,
         q: location,
-        days: 5, // Number of days for the forecast
-        aqi: 'no', // Air Quality Index (AQI) option
-        alerts: 'no', // Alerts option
+        days: 5,
+        aqi: 'no',
+        alerts: 'no',
       },
     });
 
-    // Return latitude, longitude, and weather forecast data
+    // Extract time and average temperature
+    const forecastDays = weatherResponse.data.forecast.forecastday;
+    const simplifiedForecast = forecastDays.map(day => ({
+      time: day.date,
+      avgTempC: day.day.avgtemp_c,
+    }));
+
+    // Return latitude, longitude, and simplified weather forecast data
     res.json({
       lat,
       lon,
-      weather: weatherResponse.data
+      forecast: simplifiedForecast,
     });
   } catch (error) {
     console.error(error);
