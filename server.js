@@ -62,13 +62,16 @@ app.listen(PORT, () => {
   console.log(`Open your browser and visit http://localhost:${PORT}`);
 });
 // Seed Destinations
+// Seed Destinations
 const seedDestinations = async () => {
   try {
     // Clear existing data
     await Destination.deleteMany({});
+    console.log('Existing destinations cleared');
+    
     // Insert new data
-    await Destination.insertMany(destinations);
-    console.log('Destinations seeded successfully');
+    const result = await Destination.insertMany(destinations);
+    console.log('Destinations seeded successfully', result);
   } catch (error) {
     console.error('Error seeding destinations:', error.message);
   }

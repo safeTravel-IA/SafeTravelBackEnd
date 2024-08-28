@@ -1,5 +1,6 @@
 [
   {
+    "_id": "647ff810d78e5c56414b89d0",
     "name": "Paris",
     "description": "The capital city of France, known for its art, fashion, and culture.",
     "location": {
@@ -10,6 +11,7 @@
     "image": "Paris.jpg"
   },
   {
+    "_id": "647ff810d78e5c56414b89d1",
     "name": "Grand Canyon",
     "description": "A massive canyon in Arizona, USA, known for its stunning landscapes and geological formations.",
     "location": {
@@ -20,6 +22,7 @@
     "image": "Grand Canyon.jpg"
   },
   {
+    "_id": "647ff810d78e5c56414b89d2",
     "name": "Tokyo",
     "description": "The bustling capital of Japan, famous for its skyscrapers, shopping, and rich history.",
     "location": {
@@ -30,6 +33,7 @@
     "image": "Tokyo.jpg"
   },
   {
+    "_id": "647ff810d78e5c56414b89d3",
     "name": "Great Wall of China",
     "description": "An ancient series of walls and fortifications in northern China, built to protect against invasions.",
     "location": {
@@ -40,6 +44,7 @@
     "image": "Great Wall of China.jpg"
   },
   {
+    "_id": "647ff810d78e5c56414b89d4",
     "name": "Machu Picchu",
     "description": "A 15th-century Inca citadel located in the Andes mountains of Peru.",
     "location": {
@@ -50,6 +55,7 @@
     "image": "Machu Picchu.jpg"
   },
   {
+    "_id": "647ff810d78e5c56414b89d5",
     "name": "Sydney",
     "description": "A vibrant city in Australia known for its iconic Sydney Opera House and Harbour Bridge.",
     "location": {
@@ -60,6 +66,7 @@
     "image": "Sydney.jpg"
   },
   {
+    "_id": "647ff810d78e5c56414b89d6",
     "name": "Santorini",
     "description": "A picturesque island in Greece known for its white-washed buildings and stunning sunsets.",
     "location": {
@@ -70,6 +77,7 @@
     "image": "Santorini.jpg"
   },
   {
+    "_id": "647ff810d78e5c56414b89d7",
     "name": "Serengeti National Park",
     "description": "A large national park in Tanzania, famous for its annual migration of wildebeest and zebras.",
     "location": {
@@ -80,6 +88,7 @@
     "image": "Serengeti National Park.jpg"
   },
   {
+    "_id": "647ff810d78e5c56414b89d8",
     "name": "Venice",
     "description": "A unique city in Italy known for its canals, historic buildings, and romantic gondola rides.",
     "location": {
@@ -90,6 +99,7 @@
     "image": "Venice.jpg"
   },
   {
+    "_id": "647ff810d78e5c56414b89d9",
     "name": "Niagara Falls",
     "description": "A group of three waterfalls at the border between the United States and Canada, known for its breathtaking views.",
     "location": {
@@ -100,6 +110,7 @@
     "image": "Niagara Falls.jpg"
   },
   {
+    "_id": "647ff810d78e5c56414b89da",
     "name": "Mount Everest",
     "description": "The highest mountain in the world, located in the Himalayas on the border between Nepal and China.",
     "location": {
@@ -110,6 +121,7 @@
     "image": "Mount Everest.jpg"
   },
   {
+    "_id": "647ff810d78e5c56414b89db",
     "name": "Dubai",
     "description": "A modern city in the UAE known for its luxurious lifestyle, skyscrapers, and the Burj Khalifa.",
     "location": {
@@ -120,6 +132,7 @@
     "image": "Dubai.jpg"
   },
   {
+    "_id": "647ff810d78e5c56414b89dc",
     "name": "Rome",
     "description": "The capital of Italy, famous for its ancient history, including landmarks like the Colosseum and the Vatican.",
     "location": {
@@ -130,6 +143,7 @@
     "image": "Rome.jpg"
   },
   {
+    "_id": "647ff810d78e5c56414b89dd",
     "name": "Galápagos Islands",
     "description": "An archipelago of volcanic origin in the Pacific Ocean, known for its unique wildlife and natural beauty.",
     "location": {
@@ -140,6 +154,7 @@
     "image": "Galápagos Islands.jpg"
   },
   {
+    "_id": "647ff810d78e5c56414b89de",
     "name": "Kyoto",
     "description": "A city in Japan known for its classical Buddhist temples, gardens, and traditional wooden houses.",
     "location": {
@@ -150,6 +165,7 @@
     "image": "Kyoto.jpg"
   },
   {
+    "_id": "647ff810d78e5c56414b89df",
     "name": "Iguazu Falls",
     "description": "A massive waterfall system located on the border between Argentina and Brazil, known for its spectacular views.",
     "location": {
@@ -160,6 +176,7 @@
     "image": "Iguazu Falls.jpg"
   },
   {
+    "_id": "647ff810d78e5c56414b89e0",
     "name": "Cairo",
     "description": "The capital city of Egypt, known for its rich history including the nearby pyramids of Giza.",
     "location": {
@@ -170,6 +187,7 @@
     "image": "Cairo.jpg"
   },
   {
+    "_id": "647ff810d78e5c56414b89e1",
     "name": "Dubai Desert",
     "description": "A vast desert surrounding Dubai, offering stunning dunes and camel rides.",
     "location": {
@@ -180,6 +198,7 @@
     "image": "Dubai Desert.jpg"
   },
   {
+    "_id": "647ff810d78e5c56414b89e2",
     "name": "Petra",
     "description": "An ancient city in Jordan, renowned for its rock-cut architecture and water conduit system.",
     "location": {
@@ -188,65 +207,5 @@
     },
     "category": "Historical",
     "image": "Petra.jpg"
-  },
-  {
-    "name": "Doha",
-    "description": "The capital city of Qatar, known for its modern skyscrapers and the Museum of Islamic Art.",
-    "location": {
-      "type": "Point",
-      "coordinates": [51.5310, 25.2760]
-    },
-    "category": "City",
-    "image": "Doha.jpg"
-  },
-  {
-    "name": "Marrakech",
-    "description": "A vibrant city in Morocco known for its historic medina, souks, and palaces.",
-    "location": {
-      "type": "Point",
-      "coordinates": [-7.9811, 31.6310]
-    },
-    "category": "Cultural",
-    "image": "Marrakech.jpg"
-  },
-  {
-    "name": "Oman Desert",
-    "description": "The desert region in Oman, characterized by its expansive dunes and unique desert landscape.",
-    "location": {
-      "type": "Point",
-      "coordinates": [56.5, 23.6]
-    },
-    "category": "Nature",
-    "image": "Oman Desert.jpg"
-  },
-  {
-    "name": "Beirut",
-    "description": "The capital city of Lebanon, known for its vibrant nightlife and historical landmarks.",
-    "location": {
-      "type": "Point",
-      "coordinates": [35.5089, 33.8889]
-    },
-    "category": "City",
-    "image": "Beirut.jpg"
-  },
-  {
-    "name": "Bizerte",
-    "description": "A historic city in northern Tunisia, known for its charming medina and beautiful coastline.",
-    "location": {
-      "type": "Point",
-      "coordinates": [9.8564, 37.2707]
-    },
-    "category": "City",
-    "image": "Bizerte.jpg"
-  },
-  {
-    "name": "Krakow",
-    "description": "A historic city in Poland, known for its well-preserved medieval core and Jewish quarter.",
-    "location": {
-      "type": "Point",
-      "coordinates": [19.9450, 50.0647]
-    },
-    "category": "City",
-    "image": "Krakow.jpg"
   }
 ]
