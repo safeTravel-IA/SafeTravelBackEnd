@@ -65,10 +65,10 @@ export const createForumPost = async (req, res) => {
 // Get all forum posts
 export const getAllForumPosts = async (req, res) => {
     try {
-        // Find all posts and populate only 'username' from userId and 'name' from destinationId
+        // Find all posts and populate 'username' from userId and 'name' from destinationId
         const posts = await ForumPost.find()
             .populate('userId', 'username')
-            .populate('destinationId', 'name');
+            .populate('destinationId', 'name');  // Ensure 'destinationId' is populated with 'name'
 
         // Modify the response to include additional fields like timeAgo, userId, and _id
         const modifiedPosts = posts.map(post => {
@@ -94,6 +94,8 @@ export const getAllForumPosts = async (req, res) => {
                 _id: post._id,  // ForumPost ID
                 userId: post.userId._id,  // userId as a direct field
                 userName: post.userId.username,  // username as a direct field
+                destinationId: post.destinationId._id,  // destinationId as a direct field
+                destinationName: post.destinationId.name,  // destination name as a direct field
                 timeAgo: timeAgo,  // Time since the post was created in a human-readable format
                 image: post.image ? post.image.replace('/uploads', '') : '', // Remove '/uploads' from image field
                 ...post.toObject(),  // Spread the rest of the post object
