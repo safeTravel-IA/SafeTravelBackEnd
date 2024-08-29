@@ -2,9 +2,9 @@ import express from 'express';
 
 import { getLocationLogLat,getWeatherAlertByLocation } from '../controllers/weatherController.js';
 import { getImages,getUserImages,listAllDestinations } from '../controllers/destinationController.js'; // Adjust the path as necessary
-import { getWeatherByIp,signup,signin,updateUserLocation,getProfile,getUserImage } from '../controllers/userController.js';
+import { getWeatherByIp,signup,signin,updateUserLocation,getProfile,getUserImage,shareLocationWithFriends, acceptFriend, listFriends, addFriend,listAllUsernames } from '../controllers/userController.js';
 import { convertCurrency } from '../controllers/convertionController.js';
-import { getGeolocation } from '../controllers/locationController.js';
+import { getGeolocation} from '../controllers/locationController.js';
 import { createForumPost,getAllForumPosts,getForumPostById,updateForumPost,deleteForumPost } from '../controllers/forumController.js';
 import { createPlanning } from '../controllers/planningController.js';
 import upload from '../middlewares/multer.js';
@@ -27,7 +27,7 @@ router.post('/forum/create', createForumPost);
 
 router.post('/forum/create', createForumPost);
 // Route for getting all forum posts
-router.get('/forum/getA', getAllForumPosts);
+router.get('/forum/getA', getAllForumPosts);    
 router.delete('/forum/:id', deleteForumPost);
 // Route for getting a single forum post by ID
 router.get('/forum/:id', getForumPostById);
@@ -37,10 +37,17 @@ router.get('/forum/:id', getForumPostById);
 
 router.put('/forum/:id', updateForumPost);
 router.post('/plannings', createPlanning);
+router.post('/translate', translateController);
 
 // Route for deleting a forum post
 
-router.post('/translate', translateController);
+router.post('/accept-friend', acceptFriend);
+
+router.post('/add-friend', addFriend);
+
+router.get('/list-friends', listFriends);
+router.get('/users', listAllUsernames);
 
 
+router.post('/share-location',shareLocationWithFriends);
 export default router;

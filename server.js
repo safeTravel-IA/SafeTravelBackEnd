@@ -1,6 +1,9 @@
+// Import dependencies
 import express from 'express';
 import mongoose from 'mongoose';
-import routes from './routes/routes.js';  // Routes file import
+import { createServer } from 'http'; // For creating an HTTP server
+import { Server } from 'socket.io'; // Import Socket.IO server
+import routes from './routes/routes.js'; // Routes file import
 import { notFoundError, errorHandler } from './middlewares/error-handler.js';
 import destinations from './data/destinations.json' assert { type: 'json' }; // Add the assertion
 import Destination from './models/destination.js'; // Adjust path as needed
@@ -8,22 +11,34 @@ import Destination from './models/destination.js'; // Adjust path as needed
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Create an HTTP server to use with Socket.IO
+const httpServer = createServer(app);
+
+// Initialize Socket.IO server
+const io = new Server(httpServer, {
+  cors: {
+    origin: '*', // Allow cross-origin requests, adjust as needed
+    methods: ['GET', 'POST'],
+  },
+});
+
 // Middleware
-app.use(express.json());  // Parse JSON bodies
+app.use(express.json()); // Parse JSON bodies
 
 // MongoDB Connection
-mongoose.connect('mongodb://localhost:27017/safetravel?directConnection=true')
+mongoose
+  .connect('mongodb://localhost:27017/safetravel?directConnection=true')
   .then(() => console.log('MongoDB connected to safetravel database'))
-  .catch(err => {
+  .catch((err) => {
     console.error('Failed to connect to MongoDB:', err.message);
-    process.exit(1);  // Exit the process if MongoDB connection fails
+    process.exit(1); // Exit the process if MongoDB connection fails
   });
 
 // Request Logging Middleware
 app.use((req, res, next) => {
   console.log(`Incoming request: ${req.method} ${req.url}`);
   console.log(`Headers: ${JSON.stringify(req.headers)}`);
-  next();  // Proceed to the next middleware or route handler
+  next(); // Proceed to the next middleware or route handler
 });
 
 // Response Logging Middleware
@@ -38,8 +53,29 @@ app.use((req, res, next) => {
   next();
 });
 
+// Socket.IO Connection Event
+io.on('connection', (socket) => {
+  console.log('A user connected:', socket.id);
+
+  // Handle incoming location data from clients
+  socket.on('share_location', (data) => {
+    console.log('Received location data:', data);
+
+    // Broadcast the location to other connected clients
+    socket.broadcast.emit('receive_location', data);
+  });
+
+  // Handle client disconnection
+  socket.on('disconnect', () => {
+    console.log('User disconnected:', socket.id);
+  });
+});
+
+
+
+
 // Routes
-app.use('/api', routes);  // Prefix all routes with /api
+app.use('/api', routes); // Prefix all routes with /api
 app.use(notFoundError);
 app.use(errorHandler);
 
@@ -56,19 +92,13 @@ app.use((req, res) => {
   res.status(404).send('Route not found');
 });
 
-// Start Server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Open your browser and visit http://localhost:${PORT}`);
-});
-// Seed Destinations
 // Seed Destinations
 const seedDestinations = async () => {
   try {
     // Clear existing data
     await Destination.deleteMany({});
     console.log('Existing destinations cleared');
-    
+
     // Insert new data
     const result = await Destination.insertMany(destinations);
     console.log('Destinations seeded successfully', result);
@@ -79,3 +109,11 @@ const seedDestinations = async () => {
 
 // Call the seed function
 seedDestinations();
+export { io };
+
+
+// Start the HTTP Server with Socket.IO
+httpServer.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+  console.log(`Open your browser and visit http://localhost:${PORT}`);
+});

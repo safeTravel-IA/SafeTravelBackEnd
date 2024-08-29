@@ -4,8 +4,12 @@ import User from '../models/user.js'; // Adjust path as necessary
 import upload from '../middlewares/multer.js'; // Import the Multer middleware
 import fs from 'fs';
 import path from 'path';
-
+import Friend from '../models/friend.js';
+import Message from '../models/message.js';
 import { fileURLToPath } from 'url';
+import { io } from '../server.js';         // Import the `io` instance
+import mongoose from 'mongoose';
+import Location from '../models/location.js'; // Adjust the path according to your project structure
 
 const API_KEY="5d7c47358580d0c767a2650745ac920f272ec422258c1c45270070c41b7f3ee7"
 const GEOLOCATION_API_URL = 'https://ipinfo.io/json?token=6622745470134a'; // Example URL
@@ -166,4 +170,188 @@ export const signin = async (req, res) => {
     res.status(500).json({ message: 'Something went wrong', error: error.message });
   }
 };
+export async function shareLocationWithFriends(req, res) {
+  const { userId, locationData } = req.body;
 
+  try {
+    console.log('Received userId:', userId); // Debugging line
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ error: 'Invalid user ID' });
+    }
+
+    // Create a new Location entry
+    const location = new Location({
+      userId,
+      coordinates: locationData.coordinates,
+      message: locationData.message
+    });
+    
+    await location.save();
+
+    // Find friends who have accepted the friend request
+    const friends = await Friend.find({
+      user: userId,
+      status: 'accepted'
+    }).populate('friend'); // Ensure friend field is populated
+
+    if (friends.length === 0) {
+      console.log('No accepted friends found.');
+      return res.status(200).json({ message: 'No friends to share location with.' });
+    }
+
+    // Send location to each friend
+    for (const friend of friends) {
+      const friendUser = friend.friend;
+
+      // Create a message for the friend
+      const message = {
+        sender: userId,
+        receiver: friendUser._id,
+        content: `Shared location: ${locationData.message}\nLocation: ${locationData.coordinates}`,
+        sentAt: new Date()
+      };
+
+      // Save the message to the database
+      await new Message(message).save();
+
+      // Emit location message to the friend's socket
+      sendMessageToFriend(friendUser.socketId, message);
+
+      // If the friend has a socketId, send the same message back to the sender (optional)
+      if (friendUser.socketId) {
+        const reverseMessage = {
+          sender: friendUser._id,
+          receiver: userId,
+          content: `Received location: ${locationData.message}\nLocation: ${locationData.coordinates}`,
+          sentAt: new Date()
+        };
+
+        await new Message(reverseMessage).save();
+        sendMessageToFriend(friendUser.socketId, reverseMessage);
+      }
+    }
+
+    console.log('Location shared with friends.');
+    res.status(200).json({ message: 'Location shared with friends.' });
+  } catch (error) {
+    console.error('Error sharing location with friends:', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+
+function sendMessageToFriend(friendSocketId, message) {
+  if (friendSocketId) {
+    io.to(friendSocketId).emit('receive_message', message);
+  } else {
+    console.error('Friend socket ID is not defined');
+  }
+}
+
+export async function acceptFriend(req, res) {
+  const { userId, friendId } = req.body;
+
+  try {
+    // Update the friend request from friendId to userId
+    const friendRequestFromFriend = await Friend.findOneAndUpdate(
+      { user: friendId, friend: userId, status: 'pending' },
+      { status: 'accepted' },
+      { new: true }
+    );
+
+    // Update the friend request from userId to friendId
+    const friendRequestFromUser = await Friend.findOneAndUpdate(
+      { user: userId, friend: friendId, status: 'pending' },
+      { status: 'accepted' },
+      { new: true }
+    );
+
+    // Check if either of the friend requests was not found
+    if (!friendRequestFromFriend && !friendRequestFromUser) {
+      return res.status(404).json({ error: 'Friend request not found or already accepted' });
+    }
+
+    console.log('Friend request accepted for both directions.');
+    res.status(200).json({ message: 'Friend request accepted for both directions.' });
+  } catch (error) {
+    console.error('Error accepting friend request:', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+export async function listFriends(req, res) {
+  const { userId } = req.query;
+
+  try {
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ error: 'Invalid user ID' });
+    }
+
+    const friends = await Friend.find({ user: userId, status: 'accepted' }).populate('friend');
+    
+    if (friends.length === 0) {
+      console.log('No friends found.');
+      return res.status(200).json([]);
+    }
+
+    const friendList = friends.map(friend => friend.friend);
+    res.status(200).json(friendList);
+  } catch (error) {
+    console.error('Error listing friends:', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+export async function addFriend(req, res) {
+  const { userId, friendId } = req.body;
+
+  try {
+    // Check if the friendship already exists
+    const existingFriendship = await Friend.findOne({ user: userId, friend: friendId });
+
+    if (existingFriendship) {
+      return res.status(400).json({ error: 'Friendship already exists.' });
+    }
+
+    // Create a new Friend request
+    const friendRequest = new Friend({
+      user: userId,
+      friend: friendId,
+      status: 'pending',
+    });
+    await friendRequest.save();
+
+    console.log('Friend request sent.');
+    res.status(200).json({ message: 'Friend request sent.' });
+  } catch (error) {
+    console.error('Error adding friend:', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+export const listAllUsernames = async (req, res) => {
+  try {
+    // Get the current user ID from the request (e.g., from query parameters)
+    const { currentUserId } = req.query;
+
+    if (!currentUserId) {
+      return res.status(400).json({ error: 'Current user ID is required' });
+    }
+
+    // Fetch all users from the database, including 'username' and '_id'
+    const users = await User.find({ _id: { $ne: currentUserId } }, '_id username address');
+
+    // Map users to extract id and username
+    const userDetails = users.map(user => ({
+      id: user._id,
+      username: user.username,
+      location:user.address
+    }));
+
+    // Send the list of user details in the response
+    res.json(userDetails);
+  } catch (error) {
+    // Handle errors and send a 500 response
+    res.status(500).json({ error: error.message });
+  }
+};
