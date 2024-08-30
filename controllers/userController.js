@@ -301,33 +301,76 @@ export async function listFriends(req, res) {
     res.status(500).json({ error: error.message });
   }
 }
-
 export async function addFriend(req, res) {
   const { userId, friendId } = req.body;
 
-  try {
-    // Check if the friendship already exists
-    const existingFriendship = await Friend.findOne({ user: userId, friend: friendId });
+  // Validate the ObjectId for both user and friend
+  if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(friendId)) {
+    return res.status(400).json({ error: 'Invalid user ID or friend ID' });
+  }
 
-    if (existingFriendship) {
-      return res.status(400).json({ error: 'Friendship already exists.' });
+  try {
+    // Check if a friendship exists in either direction
+    const existingFriendship = await Friend.findOne({
+      $or: [
+        { user: userId, friend: friendId },
+        { user: friendId, friend: userId }
+      ]
+    });
+
+    // If a friendship exists but is not accepted, update it to accepted
+    if (existingFriendship && existingFriendship.status !== 'accepted') {
+      existingFriendship.status = 'accepted';
+      await existingFriendship.save();
+
+      console.log('Existing friendship status updated to accepted.');
+      return res.status(200).json({ message: 'Friendship status updated to accepted.' });
     }
 
-    // Create a new Friend request
-    const friendRequest = new Friend({
-      user: userId,
-      friend: friendId,
-      status: 'pending',
-    });
-    await friendRequest.save();
+    // If no existing relationship, create a new reciprocal relationship with status accepted
+    if (!existingFriendship) {
+      const session = await mongoose.startSession();
+      session.startTransaction();
 
-    console.log('Friend request sent.');
-    res.status(200).json({ message: 'Friend request sent.' });
+      try {
+        // Create a new Friend request from user to friend with status accepted
+        const friendRequest = new Friend({
+          user: userId,
+          friend: friendId,
+          status: 'accepted',
+        });
+        await friendRequest.save({ session });
+
+        // Create a reciprocal Friend request from friend to user with status accepted
+        const reciprocalFriendRequest = new Friend({
+          user: friendId,
+          friend: userId,
+          status: 'accepted',
+        });
+        await reciprocalFriendRequest.save({ session });
+
+        // Commit the transaction
+        await session.commitTransaction();
+        session.endSession();
+
+        console.log('Friend request automatically accepted in both directions.');
+        res.status(200).json({ message: 'Friendship established automatically.' });
+      } catch (error) {
+        // Rollback the transaction if any error occurs
+        await session.abortTransaction();
+        session.endSession();
+        throw error;
+      }
+    } else {
+      // If already accepted, respond accordingly (though this case shouldn't be hit due to the above check)
+      res.status(200).json({ message: 'Friendship already exists and is accepted.' });
+    }
   } catch (error) {
     console.error('Error adding friend:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An error occurred while adding a friend.' });
   }
 }
+
 
 export const listAllUsernames = async (req, res) => {
   try {

@@ -5,7 +5,13 @@ import { createServer } from 'http'; // For creating an HTTP server
 import { Server } from 'socket.io'; // Import Socket.IO server
 import routes from './routes/routes.js'; // Routes file import
 import { notFoundError, errorHandler } from './middlewares/error-handler.js';
-import destinations from './data/destinations.json' assert { type: 'json' }; // Add the assertion
+import fs from 'fs';
+import path from 'path'; // Import the path module
+
+// Use fs and path to load JSON data
+const destinationsPath = path.resolve('./data/destinations.json');
+const destinations = JSON.parse(fs.readFileSync(destinationsPath, 'utf-8'));
+
 import Destination from './models/destination.js'; // Adjust path as needed
 
 const app = express();
@@ -71,9 +77,6 @@ io.on('connection', (socket) => {
   });
 });
 
-
-
-
 // Routes
 app.use('/api', routes); // Prefix all routes with /api
 app.use(notFoundError);
@@ -110,7 +113,6 @@ const seedDestinations = async () => {
 // Call the seed function
 seedDestinations();
 export { io };
-
 
 // Start the HTTP Server with Socket.IO
 httpServer.listen(PORT, () => {
