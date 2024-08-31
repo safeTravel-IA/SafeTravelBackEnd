@@ -11,8 +11,11 @@ import path from 'path'; // Import the path module
 // Use fs and path to load JSON data
 const destinationsPath = path.resolve('./data/destinations.json');
 const destinations = JSON.parse(fs.readFileSync(destinationsPath, 'utf-8'));
+const hospitalsPath = path.resolve('./data/hospitals.json'); // Path to the hospitals.json file
+const hospitals = JSON.parse(fs.readFileSync(hospitalsPath, 'utf-8')); // Load hospital data
 
 import Destination from './models/destination.js'; // Adjust path as needed
+import Hospital from './models/hospital.js'; // Import the Hospital model
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -109,9 +112,22 @@ const seedDestinations = async () => {
     console.error('Error seeding destinations:', error.message);
   }
 };
+const seedHospitals = async () => {
+  try {
+    // Clear existing data
+    await Hospital.deleteMany({});
+    console.log('Existing hospitals cleared');
 
+    // Insert new data
+    const result = await Hospital.insertMany(hospitals);
+    console.log('Hospitals seeded successfully', result);
+  } catch (error) {
+    console.error('Error seeding hospitals:', error.message);
+  }
+};
 // Call the seed function
 seedDestinations();
+seedHospitals(); 
 export { io };
 
 // Start the HTTP Server with Socket.IO

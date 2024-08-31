@@ -327,50 +327,35 @@ export async function addFriend(req, res) {
       return res.status(200).json({ message: 'Friendship status updated to accepted.' });
     }
 
-    // If no existing relationship, create a new reciprocal relationship with status accepted
+    // If no existing relationship, create new reciprocal friendships with status accepted
     if (!existingFriendship) {
-      const session = await mongoose.startSession();
-      session.startTransaction();
+      // Create a new Friend request from user to friend with status accepted
+      const friendRequest = new Friend({
+        user: userId,
+        friend: friendId,
+        status: 'accepted',
+      });
+      await friendRequest.save();
 
-      try {
-        // Create a new Friend request from user to friend with status accepted
-        const friendRequest = new Friend({
-          user: userId,
-          friend: friendId,
-          status: 'accepted',
-        });
-        await friendRequest.save({ session });
+      // Create a reciprocal Friend request from friend to user with status accepted
+      const reciprocalFriendRequest = new Friend({
+        user: friendId,
+        friend: userId,
+        status: 'accepted',
+      });
+      await reciprocalFriendRequest.save();
 
-        // Create a reciprocal Friend request from friend to user with status accepted
-        const reciprocalFriendRequest = new Friend({
-          user: friendId,
-          friend: userId,
-          status: 'accepted',
-        });
-        await reciprocalFriendRequest.save({ session });
-
-        // Commit the transaction
-        await session.commitTransaction();
-        session.endSession();
-
-        console.log('Friend request automatically accepted in both directions.');
-        res.status(200).json({ message: 'Friendship established automatically.' });
-      } catch (error) {
-        // Rollback the transaction if any error occurs
-        await session.abortTransaction();
-        session.endSession();
-        throw error;
-      }
+      console.log('Friend request automatically accepted in both directions.');
+      return res.status(200).json({ message: 'Friendship established automatically.' });
     } else {
       // If already accepted, respond accordingly (though this case shouldn't be hit due to the above check)
-      res.status(200).json({ message: 'Friendship already exists and is accepted.' });
+      return res.status(200).json({ message: 'Friendship already exists and is accepted.' });
     }
   } catch (error) {
     console.error('Error adding friend:', error);
-    res.status(500).json({ error: 'An error occurred while adding a friend.' });
+    return res.status(500).json({ error: 'An error occurred while adding a friend.' });
   }
 }
-
 
 export const listAllUsernames = async (req, res) => {
   try {
@@ -396,5 +381,46 @@ export const listAllUsernames = async (req, res) => {
   } catch (error) {
     // Handle errors and send a 500 response
     res.status(500).json({ error: error.message });
+  }
+};
+// Fetch all messages related to a specific user (by userId)
+export const getMessagesByUserId = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    // Validate the ObjectId
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ error: 'Invalid user ID' });
+    }
+
+    // Find all messages where the user is either the sender or receiver
+    const messages = await Message.find({
+      $or: [
+        { sender: userId },
+        { receiver: userId }
+      ]
+    }).populate('sender', 'username') // Populate sender username
+      .populate('receiver', 'username'); // Populate receiver username
+
+    if (messages.length === 0) {
+      return res.status(404).json({ message: 'No messages found for this user' });
+    }
+
+    // Format the response to include only username, date of send, and content
+    const formattedMessages = messages.map(message => {
+      const isSender = message.sender._id.toString() === userId;
+      const user = isSender ? message.sender : message.receiver;
+
+      return {
+        username: user.username,
+        sentAt: message.sentAt,
+        content: message.content
+      };
+    });
+
+    res.status(200).json(formattedMessages);
+  } catch (error) {
+    console.error('Error fetching messages:', error);
+    res.status(500).json({ error: 'Failed to fetch messages' });
   }
 };

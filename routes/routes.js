@@ -2,13 +2,14 @@ import express from 'express';
 
 import { getLocationLogLat,getWeatherAlertByLocation } from '../controllers/weatherController.js';
 import { getImages,getUserImages,listAllDestinations } from '../controllers/destinationController.js'; // Adjust the path as necessary
-import { getWeatherByIp,signup,signin,updateUserLocation,getProfile,getUserImage,shareLocationWithFriends, acceptFriend, listFriends, addFriend,listAllUsernames } from '../controllers/userController.js';
+import { getWeatherByIp,signup,signin,updateUserLocation,getProfile,getUserImage,shareLocationWithFriends, acceptFriend, listFriends, addFriend,listAllUsernames, getMessagesByUserId } from '../controllers/userController.js';
 import { convertCurrency } from '../controllers/convertionController.js';
 import { getGeolocation} from '../controllers/locationController.js';
 import { createForumPost,getAllForumPosts,getForumPostById,updateForumPost,deleteForumPost } from '../controllers/forumController.js';
 import { createPlanning } from '../controllers/planningController.js';
 import upload from '../middlewares/multer.js';
 import { translateController} from '../controllers/translationController.js';
+import { getAllHospitals, getHospitalById, listHospitalsByName } from '../controllers/hospitalController.js';
 const router = express.Router();
 router.get('/geolocation', getGeolocation);
 router.post('/signup', signup);
@@ -48,6 +49,10 @@ router.post('/add-friend', addFriend);
 router.get('/list-friends', listFriends);
 router.get('/users', listAllUsernames);
 
+router.get('/messages/:userId', getMessagesByUserId);
+router.get('/hospitals', getAllHospitals);
+router.get('/hospital/:id', getHospitalById);
+router.post('/list-hospitals-by-name', listHospitalsByName);
 
 router.post('/share-location',shareLocationWithFriends);
 export default router;

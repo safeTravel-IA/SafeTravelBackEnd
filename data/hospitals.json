@@ -1,0 +1,67 @@
+[
+    {
+        "_id": "64f7ac95123456789abcdef0",
+        "name": "HOPITAL DE PNEUMO",
+        "description": "Medical - surgical services.\nEmergency care available.",
+        "location": "V59H+W7H, Ariana",
+        "imageUrl": "HOPITAL DE PNEUMO.jpg",
+        "services": {
+            "emergency": true,
+            "care": true,
+            "facilities": true
+        },
+        "contactNumber": "+21612345678"
+    },
+    {
+        "_id": "64f7ac96123456789abcdef1",
+        "name": "Clinique La Marsa",
+        "description": "Private clinic offering specialized \n medical services.\nOpen 24/7.",
+        "location": "La Marsa, Tunis",
+        "imageUrl": "Clinique La Marsa.jpg",
+        "services": {
+            "emergency": true,
+            "care": true,
+            "facilities": true
+        },
+        "contactNumber": "+21698765432"
+    },
+    {
+        "_id": "64f7ac96123456789abcdef2",
+        "name": "Clinique El Menzah",
+        "description": "Modern medical facility with comprehensive \nhealthcare services.\nIncludes dental and orthopedic \n services.",
+        "location": "El Menzah, Tunis",
+        "imageUrl": "Clinique El Menzah.jpg",
+        "services": {
+            "emergency": true,
+            "care": true,
+            "facilities": true
+        },
+        "contactNumber": "+21623456789"
+    },
+    {
+        "_id": "64f7ac96123456789abcdef3",
+        "name": "Hôpital Charles Nicolle",
+        "description": "One of the largest  public hospitals\n in Tunisia.Specialized in\n complex surgeries.",
+        "location": "Boulevard du 9 Avril, Tunis",
+        "imageUrl": "Hôpital Charles Nicolle.jpg",
+        "services": {
+            "emergency": true,
+            "care": true,
+            "facilities": true
+        },
+        "contactNumber": "+21634567890"
+    },
+    {
+        "_id": "64f7ac96123456789abcdef4",
+        "name": "Hôpital La Rabta",
+        "description": "General hospital with a wide \n range of medical services.Includes \nmaternity and pediatric care.",
+        "location": "Bab Souika, Tunis",
+        "imageUrl": "Hôpital La Rabta.jpg",
+        "services": {
+            "emergency": true,
+            "care": true,
+            "facilities": true
+        },
+        "contactNumber": "+21645678901"
+    }
+]
