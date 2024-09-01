@@ -18,6 +18,8 @@ export async function getLocationLogLat(req, res) {
     const nominatimResponse = await axios.get(NOMINATIM_API_URL, {
       params: {
         q: location,
+        format: 'json',
+        addressdetails: 1,
       },
       headers: { 'x-api-key': NOMINATIM_API_KEY },
     });

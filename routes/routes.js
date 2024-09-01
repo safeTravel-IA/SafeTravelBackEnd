@@ -5,7 +5,7 @@ import { getImages,getUserImages,listAllDestinations } from '../controllers/dest
 import { getWeatherByIp,signup,signin,updateUserLocation,getProfile,getUserImage,shareLocationWithFriends, acceptFriend, listFriends, addFriend,listAllUsernames, getMessagesByUserId } from '../controllers/userController.js';
 import { convertCurrency } from '../controllers/convertionController.js';
 import { getGeolocation} from '../controllers/locationController.js';
-import { createForumPost,getAllForumPosts,getForumPostById,updateForumPost,deleteForumPost } from '../controllers/forumController.js';
+import { createForumPost,getAllForumPosts,getForumPostById,updateForumPost,deleteForumPost,toggleLike,showAllLikes,addComment,listComments } from '../controllers/forumController.js';
 import { createPlanning } from '../controllers/planningController.js';
 import upload from '../middlewares/multer.js';
 import { translateController} from '../controllers/translationController.js';
@@ -55,4 +55,13 @@ router.get('/hospital/:id', getHospitalById);
 router.post('/list-hospitals-by-name', listHospitalsByName);
 
 router.post('/share-location',shareLocationWithFriends);
+router.post('/posts/toggleLike', toggleLike);
+
+router.get('/posts/:postId/likes', showAllLikes);
+
+
+router.post('/posts/:postId/comments', addComment);
+
+router.get('/posts/:postId/comments', listComments);
+
 export default router;

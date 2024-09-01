@@ -399,14 +399,27 @@ export const getMessagesByUserId = async (req, res) => {
         { sender: userId },
         { receiver: userId }
       ]
-    }).populate('sender', 'username') // Populate sender username
-      .populate('receiver', 'username'); // Populate receiver username
+    })
+    .populate('sender', 'username') // Populate sender username
+    .populate('receiver', 'username'); // Populate receiver username
 
     if (messages.length === 0) {
       return res.status(404).json({ message: 'No messages found for this user' });
     }
 
-    // Format the response to include only username, date of send, and content
+    // Function to insert newlines into content every three words
+    const insertNewlinesEveryThreeWords = (text) => {
+      const words = text.split(' ');
+      const chunks = [];
+      for (let i = 0; i < words.length; i += 3) {
+        chunks.push(words.slice(i, i + 3).join(' '));
+      }
+      const formattedText = chunks.join('\n');
+      console.log('Formatted text:', formattedText); // Log formatted text
+      return formattedText;
+    };
+
+    // Format the response to include only username, date of send, and content with newlines
     const formattedMessages = messages.map(message => {
       const isSender = message.sender._id.toString() === userId;
       const user = isSender ? message.sender : message.receiver;
@@ -414,13 +427,18 @@ export const getMessagesByUserId = async (req, res) => {
       return {
         username: user.username,
         sentAt: message.sentAt,
-        content: message.content
+        content: insertNewlinesEveryThreeWords(message.content) // Apply newline formatting
       };
     });
 
+    console.log('Formatted messages:', formattedMessages); // Log formatted messages
     res.status(200).json(formattedMessages);
   } catch (error) {
     console.error('Error fetching messages:', error);
     res.status(500).json({ error: 'Failed to fetch messages' });
   }
 };
+
+
+
+

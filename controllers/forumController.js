@@ -2,6 +2,7 @@ import ForumPost from '../models/forum.js';
 import Destination from '../models/destination.js';
 import User from '../models/user.js';
 import upload from '../middlewares/multer.js'
+import Comment from '../models/comment.js';
 import multer from 'multer'; // Add this line
 import moment from 'moment';  // Import moment.js for date manipulation
 import mongoose from 'mongoose';
@@ -173,3 +174,110 @@ export const deleteForumPost = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+export const toggleLike = async (req, res) => {
+    try {
+      const { postId, userId } = req.body;
+  
+      // Log incoming request data for debugging
+      console.log("Received request to toggle like with postId:", postId, "and userId:", userId);
+  
+      // Find the post by ID
+      const post = await ForumPost.findById(postId);
+      if (!post) {
+        return res.status(404).json({ error: 'Post not found' });
+      }
+  
+      // Check if the post is already liked by the user (assuming we receive this info from the request)
+      const isLiked = req.body.isLiked; // Assume this is a boolean indicating current like status
+  
+      // Toggle like count
+      if (isLiked) {
+        post.likes -= 1; // Unlike the post
+      } else {
+        post.likes += 1; // Like the post
+      }
+  
+      // Ensure likes count does not go below zero
+      post.likes = Math.max(0, post.likes);
+  
+      // Save the updated post document
+      await post.save();
+      console.log("Post successfully updated with new like count:", post.likes);
+  
+      // Return the updated post
+      res.status(200).json(post);
+    } catch (error) {
+      console.error("Error occurred while toggling like:", error); // Log the error details
+      res.status(500).json({ error: 'An error occurred while toggling like' });
+    }
+  };
+  
+  
+  
+  // Show all likes
+  export const showAllLikes = async (req, res) => {
+    try {
+      const { postId } = req.params;
+  
+      // Find the post by ID
+      const post = await ForumPost.findById(postId);
+  
+      if (!post) {
+        return res.status(404).json({ error: 'Post not found' });
+      }
+  
+      // Return the number of likes
+      res.status(200).json({ likes: post.likes });
+    } catch (error) {
+      console.error("Error occurred while fetching likes:", error); // Log the error for debugging
+      res.status(500).json({ error: 'An error occurred while fetching likes' });
+    }
+  };
+  
+  
+  // Add a comment
+  export const addComment = async (req, res) => {
+    try {
+      const { postId, userId, content } = req.body;
+  
+      const post = await ForumPost.findById(postId);
+      if (!post) {
+        return res.status(404).json({ error: 'Post not found' });
+      }
+  
+      const comment = new Comment({
+        userId,
+        content
+      });
+  
+      post.comments.push(comment);
+      await comment.save();
+      await post.save();
+  
+      res.status(201).json(comment);
+    } catch (error) {
+      res.status(500).json({ error: 'An error occurred while adding a comment' });
+    }
+  };
+  
+  // List comments
+  export const listComments = async (req, res) => {
+    try {
+      const { postId } = req.params;
+      const post = await ForumPost.findById(postId).populate('comments.userId', 'username'); // Assuming 'comments' contains user references
+  
+      if (!post) {
+        return res.status(404).json({ error: 'Post not found' });
+      }
+  
+      // Extract only the content field from each comment
+      const commentsContent = post.comments.map(comment => ({
+        content: comment.content
+      }));
+  
+      res.status(200).json(commentsContent);
+    } catch (error) {
+      res.status(500).json({ error: 'An error occurred while listing comments' });
+    }
+  };
+  
